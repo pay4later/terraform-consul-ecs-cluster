@@ -135,7 +135,7 @@ resource "aws_autoscaling_group" "ecs_instance" {
   tags = ["${concat(
               list(
                 map("key", "Name", "value", format("%s-%s-%s", var.resource_name_prefix, "ecs-instance", random_id.entropy.hex), "propagate_at_launch", "true"),
-                map("key", "io.opsgang.consul:clusters:nodes", "value", var.consul_cluster_tag_value, "propagate_at_launch", "true"),
+                map("key", "io.opsgang.consul:clusters:ecs_nodes", "value", format("%s-%s-%s", var.resource_name_prefix, "ecs-instance", random_id.entropy.hex), "propagate_at_launch", "true"),
               ),
               var.tags_list,
             )
@@ -189,6 +189,7 @@ resource "aws_iam_role_policy" "ecs_instance" {
     {
       "Effect": "Allow",
       "Action": [
+        "ec2:DescribeInstances",
         "ecr:BatchCheckLayerAvailability",
         "ecr:BatchGetImage",
         "ecr:GetAuthorizationToken",
@@ -213,12 +214,6 @@ EOF
 /*
  * Create EC2 IAM Instance Role and Policy
  */
-resource "aws_iam_role_policy" "ec2InstanceRolePolicy" {
-  name   = "${var.resource_name_prefix}-ec2InstanceRolePolicy-${random_id.entropy.hex}"
-  role   = "${aws_iam_role.ecs_instance.id}"
-  policy = "${var.ec2_consul_policy}"
-}
-
 resource "null_resource" "waiter" {
   depends_on = ["aws_iam_instance_profile.ecs_instance"]
 

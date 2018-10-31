@@ -23,6 +23,7 @@ docker run -d \
     agent \
     -bind=$(hostname -i) \
     -client=$(hostname -i) \
+    -datacenter=${aws_region} \
     -retry-join='provider=aws region=${aws_region} addr_type=private_v4 tag_key=io.opsgang.consul:clusters:nodes tag_value=${consul_cluster_name}'
 
 # Start Registrator container
@@ -33,8 +34,9 @@ docker run -d \
     --volume=/var/run/docker.sock:/tmp/docker.sock \
     gliderlabs/registrator:latest \
       -cleanup=true \
+      -ip=$(hostname -i) \
       -retry-attempts=-1 \
       -retry-interval=2000 \
       -ttl=90 \
       -ttl-refresh=30 \
-      consul://localhost:8500
+      consul://$(hostname -i):8500
