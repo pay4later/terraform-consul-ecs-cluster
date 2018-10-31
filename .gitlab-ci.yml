@@ -35,12 +35,12 @@ stages:
 .validate: &validate
   stage: validate
   script:
-    - terraform validate -var aws_key_name=devops-dev-eu-west-1
+    - terraform validate -var aws_key_name=devops-dev-eu-west-1 -var vpc_name=MDOBREV-VPC -var consul_cluster_tag_value=consul-instance-dfe11efe
 
 .plan: &plan
   stage: build
   script:
-    - terraform plan -var aws_key_name=devops-dev-eu-west-1 -out=$ENVIRONMENT.$PLAN
+    - terraform plan -var aws_key_name=devops-dev-eu-west-1 -var vpc_name=MDOBREV-VPC -var consul_cluster_tag_value=consul-instance-dfe11efe -out=$ENVIRONMENT.$PLAN
   artifacts:
     name: plan
     paths:
