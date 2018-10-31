@@ -1,0 +1,105 @@
+# This file is a template, and might need editing before it works on your project.
+# Official image for Hashicorp's Terraform. It uses light image which is Alpine
+# based as it is much lighter.
+#
+# Entrypoint is also needed as image by default set `terraform` binary as an
+# entrypoint.
+image:
+  name: docker.deko-dev.com/docker/deko-infra:latest
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+# Default output file for Terraform plan
+variables:
+  PLAN: tfplan
+  AWS_DEFAULT_REGION: eu-west-1
+
+cache:
+  paths:
+    - .terraform
+
+before_script:
+  - aws configure set aws_access_key_id $GITLAB_ACCESS_KEY_ID
+  - aws configure set aws_secret_access_key $GITLAB_SECRET_ACCESS_KEY
+  - aws configure set default.region $REGION
+  - export AWS_DEFAULT_REGION=$REGION
+  - terraform --version
+  - terraform init
+
+stages:
+  - validate
+  - build
+  - deploy
+
+.validate: &validate
+  stage: validate
+  script:
+    - terraform validate -var aws_key_name=devops-dev-eu-west-1
+
+.plan: &plan
+  stage: build
+  script:
+    - terraform plan -var aws_key_name=devops-dev-eu-west-1 -out=$ENVIRONMENT.$PLAN
+  artifacts:
+    name: plan
+    paths:
+      - $ENVIRONMENT.$PLAN
+
+# Separate apply job for manual launching Terraform as it can be destructive
+# action.
+.apply: &apply
+  stage: deploy
+  script:
+    - terraform apply -auto-approve $ENVIRONMENT.$PLAN
+  artifacts:
+    name: tfstate
+    paths:
+      - $ENVIRONMENT.$PLAN
+      - terraform.tfstate
+  when: manual
+
+.destroy: &destroy
+  stage: deploy
+  script:
+    - terraform destroy -auto-approve
+  artifacts:
+    name: tfstate
+    paths:
+      - $ENVIRONMENT.$PLAN
+      - terraform.tfstate
+  when: manual
+
+validate:
+  <<: *validate
+  variables:
+    ENVIRONMENT: production
+
+plan:
+  <<: *plan
+  variables:
+    ENVIRONMENT: production
+
+apply-master:
+  <<: *apply
+  environment:
+    name: Production
+    url: https://www.google.com
+  variables:
+    ENVIRONMENT: production
+  dependencies:
+    - plan
+  only:
+    - master
+
+destroy-master:
+  <<: *destroy
+  environment:
+    name: Production
+    url: https://www.google.com
+  variables:
+    ENVIRONMENT: production
+  dependencies:
+    - plan
+  only:
+    - master
