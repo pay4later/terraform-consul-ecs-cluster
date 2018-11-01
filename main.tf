@@ -74,13 +74,55 @@ data "aws_subnet" "private" {
 # Define security groups
 resource "aws_security_group" "ecs_instance" {
   name_prefix = "${var.resource_name_prefix}-ecs-sg-${random_id.entropy.hex}"
-  description = "Allows http and SSH from VPC"
+  description = "Allows comminucation to and from our VPC"
   vpc_id      = "${data.aws_vpc.current.id}"
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
+    description = "Allow SSH from the VPC range"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
+  }
+
+  ingress {
+    description = "TCP (8301) Consul gossip protocol"
+    from_port   = 8301
+    to_port     = 8301
+    protocol    = "tcp"
+    cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
+  }
+
+  ingress {
+    description = "UDP (8301) Consul gossip protocol"
+    from_port   = 8301
+    to_port     = 8301
+    protocol    = "udp"
+    cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
+  }
+
+  ingress {
+    description = "TCP range for ECS container exposure"
+    from_port   = 31678
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
+  }
+
+  ingress {
+    description = "UDP range for ECS container exposure"
+    from_port   = 31678
+    to_port     = 65535
+    protocol    = "udp"
+    cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
+  }
+
+  # ICMP
+  ingress {
+    description = "Allow ICMP from VPC"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
     cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
   }
 
