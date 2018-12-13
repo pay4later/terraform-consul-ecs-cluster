@@ -1,0 +1,5 @@
+vpc_name = "production-vpc"
+instance_type = "t3.2xlarge"
+aws_key_name = "master-eu-west-1"
+resource_name_prefix = "production-consul"
+consul_cluster_tag_value = "production-consul-instance-0b1bdba8"
