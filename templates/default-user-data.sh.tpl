@@ -22,7 +22,7 @@ docker run -d \
   consul:${consul_version} \
     agent \
     -bind=$(hostname -i) \
-    -client=$(hostname -i) \
+    -client=0.0.0.0 \
     -datacenter=${aws_region} \
     -retry-join='provider=aws region=${aws_region} addr_type=private_v4 tag_key=io.opsgang.consul:clusters:nodes tag_value=${consul_cluster_name}'
 
