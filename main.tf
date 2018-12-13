@@ -67,7 +67,7 @@ data "aws_subnet" "private" {
   availability_zone = "${element(data.aws_availability_zones.available.names, count.index)}"
 
   tags {
-    Tier = "Private"
+    Tier = "new-private"
   }
 }
 
@@ -161,6 +161,11 @@ resource "aws_launch_configuration" "ecs_instance" {
     volume_size = 30
   }
 
+  ebs_block_device {
+    device_name = "/dev/xvdcz"
+    volume_size = 150
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -206,6 +211,46 @@ resource "aws_autoscaling_policy" "ecs_instance_scale_down" {
   policy_type            = "SimpleScaling"
   cooldown               = 240
   scaling_adjustment     = -1
+}
+
+resource "aws_cloudwatch_metric_alarm" "ecs-instance-cpu-high" {
+  alarm_name          = "${var.resource_name_prefix}-ecs-instance-cpu-high-${random_id.entropy.hex}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUReservation"
+  namespace           = "AWS/ECS"
+  period              = "${var.ecs-instance-cpu-high-period}"
+  statistic           = "Average"
+  threshold           = "${var.ecs-instance-cpu-high-threshold}"
+  alarm_description   = "Monitors ec2 cpu for high reservation on ${terraform.workspace} ecs instances"
+
+  alarm_actions = [
+    "${aws_autoscaling_policy.ecs_instance_scale_up.arn}",
+  ]
+
+  dimensions {
+    ClusterName = "${aws_ecs_cluster.this.name}"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "ecs-instance-cpu-low" {
+  alarm_name          = "${var.resource_name_prefix}-ecs-instance-cpu-low-${random_id.entropy.hex}"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUReservation"
+  namespace           = "AWS/ECS"
+  period              = "${var.ecs-instance-cpu-low-period}"
+  statistic           = "Average"
+  threshold           = "${var.ecs-instance-cpu-low-threshold}"
+  alarm_description   = "Monitors ec2 cpu for low reservation on ${terraform.workspace} ecs instances"
+
+  alarm_actions = [
+    "${aws_autoscaling_policy.ecs_instance_scale_down.arn}",
+  ]
+
+  dimensions {
+    ClusterName = "${aws_ecs_cluster.this.name}"
+  }
 }
 
 resource "aws_iam_instance_profile" "ecs_instance" {

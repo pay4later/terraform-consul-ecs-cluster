@@ -33,7 +33,7 @@ variable "ecs_instances_min" {
 variable "ecs_instances_max" {
   type        = "string"
   description = "Maximum autoscale (number of EC2 ECS Instances)"
-  default     = "3"
+  default     = "8"
 }
 
 variable "aws_key_name" {
@@ -75,6 +75,31 @@ variable "tags_list" {
 variable "resource_name_prefix" {
   description = "All the resources will be prefixed with the value of this variable"
   default     = "consul"
+}
+
+// EC2 Scaling options
+variable "ecs-instance-cpu-high-period" {
+  type        = "string"
+  description = "Period when CloudWatch checks for high CPU usage at EC2 level"
+  default     = "60"
+}
+
+variable "ecs-instance-cpu-high-threshold" {
+  type        = "string"
+  description = "Threshold when CloudWatch reports high CPU usage at EC2 level"
+  default     = "70"
+}
+
+variable "ecs-instance-cpu-low-period" {
+  type        = "string"
+  description = "Period when CloudWatch checks for low CPU usage at EC2 level"
+  default     = "60"
+}
+
+variable "ecs-instance-cpu-low-threshold" {
+  type        = "string"
+  description = "Threshold when CloudWatch reports low CPU usage at EC2 level"
+  default     = "45"
 }
 
 /*
