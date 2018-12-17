@@ -84,6 +84,14 @@ resource "aws_security_group" "ecs_instance" {
     protocol    = "tcp"
     cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
   }
+  
+  ingress {
+    description = "Allow SSH from the Admin VPC range"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.128.0.0/17"]
+  }
 
   ingress {
     description = "TCP (8301) Consul gossip protocol"
