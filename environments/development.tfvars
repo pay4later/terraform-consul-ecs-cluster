@@ -1,0 +1,6 @@
+region = "eu-west-2"
+vpc_name = "development-vpc"
+instance_type = "t3.medium"
+aws_key_name = "master-development"
+resource_name_prefix = "development-consul"
+consul_cluster_tag_value = "development-consul-instance-95acf6dc"

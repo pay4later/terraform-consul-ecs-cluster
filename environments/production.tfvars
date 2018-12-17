@@ -1,3 +1,4 @@
+region = "eu-west-1"
 vpc_name = "production-vpc"
 instance_type = "t3.2xlarge"
 aws_key_name = "master-eu-west-1"

@@ -1,5 +1,6 @@
+region = "eu-west-2"
 vpc_name = "uat-vpc"
-instance_typev= "t3.large"
+instance_type = "t3.xlarge"
 aws_key_name = "master-eu-west-2"
 resource_name_prefix = "staging-consul"
 consul_cluster_tag_value = "staging-consul-instance-95acf6dc"
