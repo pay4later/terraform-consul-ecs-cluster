@@ -216,7 +216,7 @@ resource "aws_autoscaling_policy" "ecs_instance_scale_down" {
 resource "aws_cloudwatch_metric_alarm" "ecs-instance-cpu-high" {
   alarm_name          = "${var.resource_name_prefix}-ecs-instance-cpu-high-${random_id.entropy.hex}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "10"
   metric_name         = "CPUReservation"
   namespace           = "AWS/ECS"
   period              = "${var.ecs-instance-cpu-high-period}"
@@ -236,7 +236,7 @@ resource "aws_cloudwatch_metric_alarm" "ecs-instance-cpu-high" {
 resource "aws_cloudwatch_metric_alarm" "ecs-instance-cpu-low" {
   alarm_name          = "${var.resource_name_prefix}-ecs-instance-cpu-low-${random_id.entropy.hex}"
   comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "10"
   metric_name         = "CPUReservation"
   namespace           = "AWS/ECS"
   period              = "${var.ecs-instance-cpu-low-period}"
