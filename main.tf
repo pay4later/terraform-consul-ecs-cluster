@@ -1,5 +1,9 @@
 terraform {}
 
+provider "aws" {
+  region = "${var.region}"
+}
+
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
@@ -66,8 +70,9 @@ data "aws_subnet" "private" {
   vpc_id            = "${data.aws_vpc.current.id}"
   availability_zone = "${element(data.aws_availability_zones.available.names, count.index)}"
 
-  tags {
-    Tier = "new-private"
+  filter {
+    name = "tag:Name"
+    values = ["${var.vpc_name}-private-*"]
   }
 }
 
@@ -83,6 +88,14 @@ resource "aws_security_group" "ecs_instance" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["${data.aws_vpc.current.cidr_block}"]
+  }
+
+  ingress {
+    description = "Allow SSH from the Admin VPC range"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.128.0.0/17"]
   }
 
   ingress {

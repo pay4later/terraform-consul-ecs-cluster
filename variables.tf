@@ -1,3 +1,7 @@
+variable "region" {
+  description = "The AWS region"
+}
+
 variable "vpc_name" {
   default     = "Default"
   description = "The name of the VPC ommiting the -vpc suffix"
@@ -42,6 +46,7 @@ variable "aws_key_name" {
 
 variable "tags" {
   description = "A map of tags to add to all resources"
+  type        = "map"
 
   default = {
     BillingTeamName = "DevOps"

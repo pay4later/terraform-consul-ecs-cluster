@@ -2,3 +2,5 @@
 *.tfplan
 *.tfstate
 *.tfstate.backup
+/terraform.tfstate.d/
+/.idea/
